@@ -1,0 +1,37 @@
+kind = "web"
+previewPath = "/"
+title = "RingCX Supervisor View"
+version = "1.0.0"
+id = "artifacts/supervisor-view"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22870
+
+[services.development]
+run = "pnpm --filter @workspace/supervisor-view run dev"
+
+[services.development.env]
+PORT = "22870"
+NODE_ENV = "development"
+
+[services.production]
+
+[services.production.build]
+args = ["pnpm", "--filter", "@workspace/supervisor-view", "run", "build"]
+
+[services.production.build.env]
+NODE_ENV = "production"
+
+[services.production.run]
+args = ["node", "artifacts/supervisor-view/dist/index.cjs"]
+
+[services.production.run.env]
+PORT = "22870"
+NODE_ENV = "production"

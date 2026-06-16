@@ -1,0 +1,2 @@
+- [Importing fullstack templates into the monorepo](import-fullstack-template.md) — self-contained artifact pattern, pnpm strict-resolution gotchas (nanoid, @mui/system, @emotion/is-prop-valid).
+- [RingCX supervisor-view app](rcx-supervisor-view.md) — vendored RingCX prototype; proto/ is tsc-excluded; column-meta derives from interactionColumns; airProName drives AI agent display names.
