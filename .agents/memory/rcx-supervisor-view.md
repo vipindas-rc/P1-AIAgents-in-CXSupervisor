@@ -23,3 +23,11 @@ routes; all data is generated under `client/src/proto/`.
   confidence/sentiment. They look similar but are independent — don't conflate them.
 - Tab switching (Agents/Interactions) is React `useState`, not URL-routed, so you can't
   deep-link to the Interactions tab for a screenshot.
+- **E2e-testing the Agents tab row actions:** the per-row "more" (⋮) button only appears on
+  hover and its menu portals to `body`, so targeting a specific row by hover is flaky (a
+  test can easily open an adjacent row's menu). Isolate one agent via the "Search agents"
+  box first (filters by name substring), then there's only one row/menu to act on.
+- The "Update agent state" menu item is disabled (greyed + tooltip) only for base states
+  ENGAGED/CHAT-ENGAGED/BREAK-AFTER-CALL/TRANSITION/PREVIEWING (see MoreMenu); the dialog
+  pre-selects the agent's current base state when it maps to a settable option. Human vs Air
+  option sets come from HUMAN_STATE_OPTIONS / AIR_STATE_OPTIONS in UpdateAgentStateModal.tsx.
