@@ -728,6 +728,7 @@ export default function AgentTablePanel({
           <UpdateAgentStateModal
             agentName={stateModalAgent.fullName}
             agentType={stateModalAgent.agentType}
+            currentBaseState={stateModalAgent.agentBaseState}
             onCancel={() => setStateModalAgentId(null)}
             onUpdate={applyAgentState}
           />

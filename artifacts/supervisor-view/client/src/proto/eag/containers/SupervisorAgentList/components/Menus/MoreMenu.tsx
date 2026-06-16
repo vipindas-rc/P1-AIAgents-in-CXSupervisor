@@ -40,6 +40,8 @@ export const MoreMenu = forwardRef<
         const isChangeAgentStateDisabled =
             agentBaseState === 'BREAK-AFTER-CALL' ||
             agentBaseState === 'TRANSITION' ||
+            agentBaseState === 'ENGAGED' ||
+            agentBaseState === 'CHAT-ENGAGED' ||
             isPreviewState;
         const agentStateToolTip = isChangeAgentStateDisabled
             ? translate('MONITORING.TOOL_TIP.UPDATE_AGENT_STATE', {

@@ -41,15 +41,28 @@ interface Props {
   agentName?: string;
   /** Drives which state options the dropdown offers (Air vs Human). */
   agentType?: string;
+  /**
+   * The agent's current base state (e.g. "AVAILABLE", "LUNCH"). When it matches
+   * a settable option, the dropdown opens pre-selected on it; otherwise the
+   * picker falls back to the empty/placeholder state.
+   */
+  currentBaseState?: string;
   onCancel: () => void;
   onUpdate: (option: AgentStateOption) => void;
 }
 
-export function UpdateAgentStateModal({ agentType, onCancel, onUpdate }: Props) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [selected, setSelected] = useState<AgentStateOption | null>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
+export function UpdateAgentStateModal({
+  agentType,
+  currentBaseState,
+  onCancel,
+  onUpdate,
+}: Props) {
   const options = agentStateOptionsFor(agentType);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [selected, setSelected] = useState<AgentStateOption | null>(
+    () => options.find((o) => o.key === currentBaseState) ?? null,
+  );
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Close on Escape, mirroring standard dialog behaviour.
   useEffect(() => {
