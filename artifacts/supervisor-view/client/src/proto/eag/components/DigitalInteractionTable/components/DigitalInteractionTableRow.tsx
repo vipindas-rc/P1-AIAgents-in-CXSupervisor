@@ -316,7 +316,7 @@ export const DigitalInteractionTableRow: FC<{
                 })}
             </SupervisorRowWrapper>
 
-            {showInformationIcon ? (
+            {agentType === 'Air' ? null : showInformationIcon ? (
                 <InformationHoverMenu
                     isInfoToolTipVisible={isInfoToolTipVisible}
                 >

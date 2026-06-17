@@ -247,11 +247,13 @@ const SupervisorRowRenderer: FC<ISupervisorAgentListRow> = ({
                     );
                 })}
             </SupervisorRowWrapper>
-            <SupervisorListHoverMenu role='gridcell'>
-                <StyledSupervisorCellWrapper>
-                    {supervisorRowHoverItems}
-                </StyledSupervisorCellWrapper>
-            </SupervisorListHoverMenu>
+            {agentType !== 'Air' && (
+                <SupervisorListHoverMenu role='gridcell'>
+                    <StyledSupervisorCellWrapper>
+                        {supervisorRowHoverItems}
+                    </StyledSupervisorCellWrapper>
+                </SupervisorListHoverMenu>
+            )}
         </Fragment>
     );
 };
