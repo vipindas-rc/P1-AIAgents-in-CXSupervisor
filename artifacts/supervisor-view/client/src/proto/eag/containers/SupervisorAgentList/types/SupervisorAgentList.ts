@@ -134,6 +134,7 @@ export interface IGetHoveredItems {
     agentState: string;
     isChangeAgentStateAvailable: boolean;
     fullName: string;
+    agentType?: string;
 }
 type ActiveInteractionType = {
     sourceName: string;

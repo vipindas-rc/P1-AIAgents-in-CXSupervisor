@@ -34,7 +34,25 @@ export const getHoveredItems = (props: IGetHoveredItems) => {
         isChangeAgentStateAvailable,
         disabledTooltip,
         fullName,
+        agentType,
     } = props;
+
+    const moreMenu = _getMoreHoveredMenu(
+        onLogOut,
+        changeAgentState,
+        agentBaseState,
+        agentState,
+        agentId,
+        showLogout,
+        showChangeState,
+        isChangeAgentStateAvailable
+    );
+
+    // AI (AirPro) agents only expose the "more" menu on hover; the monitor and
+    // live-monitoring quick actions don't apply to AI agents.
+    if (agentType === 'Air') {
+        return [moreMenu];
+    }
 
     return [
         _getMonitorHoveredMenu({
@@ -53,16 +71,7 @@ export const getHoveredItems = (props: IGetHoveredItems) => {
             showMonitor,
             monitorVoice,
         }),
-        _getMoreHoveredMenu(
-            onLogOut,
-            changeAgentState,
-            agentBaseState,
-            agentState,
-            agentId,
-            showLogout,
-            showChangeState,
-            isChangeAgentStateAvailable
-        ),
+        moreMenu,
     ];
 };
 

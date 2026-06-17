@@ -107,6 +107,7 @@ const SupervisorRowRenderer: FC<ISupervisorAgentListRow> = ({
                 isChangeAgentStateAvailable,
                 disabledTooltip,
                 fullName,
+                agentType,
             }),
         [
             agentId,
@@ -123,6 +124,7 @@ const SupervisorRowRenderer: FC<ISupervisorAgentListRow> = ({
             isChangeAgentStateAvailable,
             disabledTooltip,
             fullName,
+            agentType,
         ]
     );
 
@@ -247,13 +249,11 @@ const SupervisorRowRenderer: FC<ISupervisorAgentListRow> = ({
                     );
                 })}
             </SupervisorRowWrapper>
-            {agentType !== 'Air' && (
-                <SupervisorListHoverMenu role='gridcell'>
-                    <StyledSupervisorCellWrapper>
-                        {supervisorRowHoverItems}
-                    </StyledSupervisorCellWrapper>
-                </SupervisorListHoverMenu>
-            )}
+            <SupervisorListHoverMenu role='gridcell'>
+                <StyledSupervisorCellWrapper>
+                    {supervisorRowHoverItems}
+                </StyledSupervisorCellWrapper>
+            </SupervisorListHoverMenu>
         </Fragment>
     );
 };
