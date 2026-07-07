@@ -27,6 +27,21 @@ routes; all data is generated under `client/src/proto/`.
   hover and its menu portals to `body`, so targeting a specific row by hover is flaky (a
   test can easily open an adjacent row's menu). Isolate one agent via the "Search agents"
   box first (filters by name substring), then there's only one row/menu to act on.
+- **`@proto` types come from a hand-written barrel `client/src/proto-module.d.ts`** (`declare
+  module "@proto"`), NOT from the real `proto/AgentTablePanel.tsx` (proto is tsc-excluded). The
+  vite alias points `@proto` at that .tsx for runtime, but tsc only sees the .d.ts. So any NEW
+  symbol you export from AgentTablePanel and import in a typechecked file (e.g. pages/) must ALSO
+  be declared in proto-module.d.ts or tsc fails with TS2614 "no exported member".
+- **CXAIR Phase 1 scope flags** live in `proto/eag/constants/features.ts` (`CXAIR_PHASE1_FLAGS`
+  + `isCxairPhase1FeatureEnabled`), default OFF. They gate 3 deferred pieces (AI/"Air" agents in
+  Agents tab, AI agent state-change action, Confidence+Sentiment interaction columns). Flipping a
+  flag ON restores pre-Phase-1 behavior; the underlying code (modal, ScoreIndicator, renderers)
+  is intact behind the gate, never deleted. The `aiAgentsInAgentsTab` flag ALSO drives the
+  Agents-tab knock-on cleanup: it drops the "Agent type" column (gated in the `columns` array in
+  supervisorMock.ts, cascades via agentColumnMeta to table + settings dialog), hides the Agent
+  type filter dropdown entirely (Agents tab shows only Channel + State), and narrows the State
+  filter to Human states only (SupervisorAgents `stateOptionsForType`) so no AI-only state lingers
+  as a dead option. Interactions-tab agentType column + agent-type dropdown are separate and kept.
 - The "Update agent state" menu item is disabled (greyed + tooltip) only for base states
   ENGAGED/CHAT-ENGAGED/BREAK-AFTER-CALL/TRANSITION/PREVIEWING (see MoreMenu); the dialog
   pre-selects the agent's current base state when it maps to a settable option. Human vs Air

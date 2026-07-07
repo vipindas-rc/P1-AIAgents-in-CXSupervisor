@@ -22,4 +22,7 @@ declare module "@proto" {
   export const interactionColumnMeta: { id: string; label: string }[];
   export const agentStateOptions: Record<"All" | "Air" | "Human", string[]>;
   export const agentFilterOptions: { value: string; label: string }[];
+  export function isCxairPhase1FeatureEnabled(
+    flag: "aiAgentsInAgentsTab" | "aiAgentStateChange" | "interactionScoreColumns",
+  ): boolean;
 }

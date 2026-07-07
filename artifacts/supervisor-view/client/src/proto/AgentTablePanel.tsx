@@ -30,6 +30,11 @@ import {
   makeInteractions,
   rollupColumns,
 } from "./mock/supervisorMock";
+import { isCxairPhase1FeatureEnabled } from "./eag/constants/features";
+
+// Re-exported so page-level code (outside proto/) reads CXAIR Phase 1 flags
+// through the same @proto barrel it already uses for column metadata.
+export { isCxairPhase1FeatureEnabled } from "./eag/constants/features";
 
 // Single source of truth for the agent table column ids/labels, derived directly
 // from the proto column definitions. Consumed by the page's settings dialog so
@@ -218,6 +223,14 @@ export default function AgentTablePanel({
     () =>
       agents
         .filter((a: any) => {
+          // CXAIR Phase 1: AI ("Air") agents live in the Interactions tab only,
+          // so keep them out of the Agents list unless the flag re-enables them.
+          if (
+            a.agentType === "Air" &&
+            !isCxairPhase1FeatureEnabled("aiAgentsInAgentsTab")
+          ) {
+            return false;
+          }
           if (agentTypeFilter !== "All" && a.agentType !== agentTypeFilter) {
             return false;
           }
@@ -242,10 +255,15 @@ export default function AgentTablePanel({
             ...rest,
             showMonitor: a.agentId !== monitoredId,
             showLogout: true,
-            // "Update agent state" is offered for every agent: AirPro agents get
-            // the Inactive/Pending-Inactive lifecycle toggle, human agents get a
-            // simple Available <-> On Break supervisor override.
-            showChangeState: true,
+            // "Update agent state" is offered for human agents (Available <-> On
+            // Break supervisor override). For AI ("Air") agents the state change
+            // (Available <-> Inactive, incl. the Pending Inactive drain flow) is
+            // deferred in CXAIR Phase 1, so it's hidden unless the flag restores
+            // it; the modal path is only reachable through this menu action.
+            showChangeState:
+              a.agentType === "Air"
+                ? isCxairPhase1FeatureEnabled("aiAgentStateChange")
+                : true,
           };
         }),
     [agents, monitoredId, agentTypeFilter, statusFilter, selectedAgentGroups],

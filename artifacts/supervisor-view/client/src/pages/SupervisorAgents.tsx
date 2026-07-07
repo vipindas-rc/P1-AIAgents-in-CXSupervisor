@@ -4,6 +4,7 @@ import AgentTablePanel, {
   interactionColumnMeta,
   agentStateOptions,
   agentFilterOptions,
+  isCxairPhase1FeatureEnabled,
 } from "@proto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -193,6 +194,13 @@ export const SupervisorAgents = (): JSX.Element => {
   );
   const isInteractions = activeTab === "Interactions";
 
+  // CXAIR Phase 1: AI agents don't appear in the Agents tab, so the "AirPro
+  // agents" agent-type filter option is dropped there (offering it would only
+  // yield an empty list). The Interactions tab keeps both options.
+  const agentsTabTypeOptions = isCxairPhase1FeatureEnabled("aiAgentsInAgentsTab")
+    ? AGENT_TYPE_OPTIONS
+    : AGENT_TYPE_OPTIONS.filter((o) => o.value !== "Air");
+
   // When the supervisor clicks an agent's "Active interactions" icons we jump to
   // the Interactions tab and blink that agent's rows. The nonce re-triggers the
   // blink animation even if the same agent is clicked again.
@@ -213,7 +221,15 @@ export const SupervisorAgents = (): JSX.Element => {
 
   // The State filter offers exactly the states present in the table for the
   // selected agent type (human states for Human, AirPro states for AirPro).
-  const stateOptionsForType = agentStateOptions[agentTypeFilter] ?? [];
+  // CXAIR Phase 1: when AI agents are hidden, the "All" agent-type view shows only
+  // Human agents, so the State filter must offer Human states only — otherwise
+  // Air-only states (e.g. Inactive / Pending Inactive) linger as dead options that
+  // always resolve to an empty list.
+  const stateOptionsForType =
+    !isCxairPhase1FeatureEnabled("aiAgentsInAgentsTab") &&
+    agentTypeFilter === "All"
+      ? agentStateOptions.Human
+      : agentStateOptions[agentTypeFilter] ?? [];
 
   // Agent-type filter (shared by both tabs). Changing it also clamps the Agents
   // tab State selection to a value valid for the new type.
@@ -566,8 +582,10 @@ export const SupervisorAgents = (): JSX.Element => {
               className="flex shrink-0 items-center gap-3 border-b border-[#0000001a] bg-white px-5 py-3"
               data-testid="filter-row"
             >
-              {/* Agents tab: exactly 3 dropdowns — Channel, Agent type, State.
-                  The State options are conditional on the selected Agent type. */}
+              {/* Agents tab: Channel + State dropdowns. CXAIR Phase 1 hides the
+                  Agent type dropdown (every row is a Human agent, so it's a no-op);
+                  the aiAgentsInAgentsTab flag restores it. State options track the
+                  selected Agent type when the type dropdown is shown. */}
               {!isInteractions && (
                 <>
                   <FilterDropdown
@@ -580,13 +598,15 @@ export const SupervisorAgents = (): JSX.Element => {
                     }))}
                     testId="select-channel"
                   />
-                  <FilterDropdown
-                    value={agentTypeFilter}
-                    onValueChange={handleAgentTypeChange}
-                    allLabel="All agent types"
-                    options={AGENT_TYPE_OPTIONS}
-                    testId="select-agent-type"
-                  />
+                  {isCxairPhase1FeatureEnabled("aiAgentsInAgentsTab") && (
+                    <FilterDropdown
+                      value={agentTypeFilter}
+                      onValueChange={handleAgentTypeChange}
+                      allLabel="All agent types"
+                      options={agentsTabTypeOptions}
+                      testId="select-agent-type"
+                    />
+                  )}
                   <FilterDropdown
                     value={stateFilter}
                     onValueChange={setStateFilter}

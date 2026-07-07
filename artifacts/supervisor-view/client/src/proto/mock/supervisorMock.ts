@@ -4,6 +4,7 @@ import type {
   ISupervisorAgentListItem,
 } from '../eag/containers/SupervisorAgentList/types/SupervisorAgentList';
 import captured from './captured-data.json';
+import { isCxairPhase1FeatureEnabled } from '../eag/constants/features';
 
 // Real data shapes captured from the running RingCX app (SupervisorSvc), so the
 // fields/icons/rollups match exactly what the components expect.
@@ -16,7 +17,14 @@ const clone = <T>(v: T): T =>
 export const columns: ISupervisorTableCol[] = [
   { id: 'fullName', content: 'Agent', sortAs: SortType.STRING, visible: true, disabled: true, width: 180 },
   { id: 'agentState', content: 'State', sortAs: SortType.STRING, visible: true, width: 160 },
-  { id: 'agentType', content: 'Agent type', sortAs: SortType.STRING, visible: true, width: 120 },
+  // CXAIR Phase 1: with AI ("Air") agents kept out of the Agents tab, every row
+  // here is a Human agent, so the "Agent type" column is redundant and is dropped
+  // unless the flag re-adds AI agents. agentColumnMeta + the settings dialog +
+  // visible-col defaults all derive from this list, so it disappears everywhere.
+  // (The Interactions-tab agentType column is separate and stays — it shows AI.)
+  ...(isCxairPhase1FeatureEnabled('aiAgentsInAgentsTab')
+    ? ([{ id: 'agentType', content: 'Agent type', sortAs: SortType.STRING, visible: true, width: 120 }] as ISupervisorTableCol[])
+    : []),
   { id: 'stateDuration', content: 'State duration', sortAs: SortType.NUMBER, visible: true, width: 120 },
   { id: 'pendingDispTime', content: 'Pending disposition', sortAs: SortType.NUMBER, visible: true, width: 120 },
   { id: 'activeInteractions', content: 'Active interactions', sortAs: SortType.STRING, visible: true, width: 140 },
@@ -41,6 +49,18 @@ export const interactionColumns: ISupervisorTableCol[] = [
   { id: 'contactIdentity', content: 'From', sortAs: SortType.STRING, visible: true, width: 170 },
   { id: 'threadTitle', content: 'Subject', sortAs: SortType.STRING, visible: true, width: 200 },
   { id: 'pendingDispositionMs', content: 'Pending disp.', sortAs: SortType.NUMBER, visible: true, width: 110 },
+  // CXAIR Phase 1: the Confidence + Sentiment quality-score columns are deferred
+  // to Phase 2 (INIT-28002), so they're only added to the table when the flag is
+  // on. The scores, ScoreIndicator, and the per-cell render code stay intact —
+  // this list is the single on/off switch (header + cells derive from it). Since
+  // the columns are single-sourced here, they cascade to the settings dialog and
+  // visible-column defaults too, so the layout stays gap-free either way.
+  ...(isCxairPhase1FeatureEnabled('interactionScoreColumns')
+    ? ([
+        { id: 'confidenceScore', content: 'Confidence', sortAs: SortType.NUMBER, visible: true, width: 120 },
+        { id: 'sentimentScore', content: 'Sentiment', sortAs: SortType.NUMBER, visible: true, width: 120 },
+      ] as ISupervisorTableCol[])
+    : []),
 ];
 
 // --- Interaction-rollup popover columns (real INTERACTION_ROLLUP_COLUMNS) ---
