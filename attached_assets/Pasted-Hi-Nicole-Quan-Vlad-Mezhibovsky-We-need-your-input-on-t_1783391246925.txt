@@ -1,0 +1,67 @@
+Hi Nicole Quan Vlad Mezhibovsky,
+We need your input on these 2 items:
+AI Agents shown in both the Agent tab and the Interactions tab.
+Change Agent State with Available ↔ Inactive toggle.
+The 1st item (see attached) may pull the Analytics team into this phase, which could be out of our control and we can't commit it to Q3. OR when the Nova team builds their realtime dashboard, we can simply call their API to get the data and wouldn't need to maintain it ourselves . 
+The 2nd item will also enlarge the scope of this feature. We only want to observe the bot's activities, but changing from Available to Inactive would be a 'write' operation to the system. It would also need the workflow team to be involved, which isn't ideal for the commitment. 
+
+So I'm wondering if we can move them to a future phase to have a more controllable commitment? What do you think? Thanks!
+cc: Jilion (Zhiliang) Chen Kaison Zhang Sven Liu 
+image.png
+
+Nicole Quan
+7/2 01:04 AM
+Chen Kong I am absolutely fine with use moving number 2 into a future phase. I am not sure I understand why it is so much effort to shop a column for AI agents in Interactions. We already have access to the data on the agents tab. 
+
+Chen Kong
+Working
+
+7/2 06:05 AM
+Nicole Quan Thank you for the flexibility.
+For item 1, the interactions tab will be in the scope as it's temporary data and will be gone when the interaction is finished. However, for the agents tab, it becomes more complicated, it shows that we need to store the data somewher, record and calculate it, not quite sure which place is the best and the discussion may last too long time, Vlad Mezhibovsky what do you think?
+
+Vlad Mezhibovsky
+7/2 06:40 AM
+Chen Kong Right now Bots are modeled very similarly to IVRs/Workflows. If you look at the real-time dashboards (Admin view), you'll see Workflow stats (see attached screenshot). This information is already aggregated and present in the stats schema tables. EST takes active calls+sessions data, filters it by product type (queue, workflow, etc), copies it to the stats schema, and creates daily aggregations. It continuously updates this data. ESV uses this data to render the Supervisor's view.
+
+What we're missing:
+- EST needs to pick up Bot segments (relax the filter, adjust sync table triggers)
+- add new aggregations to EST that would produce agent-like metrics (but not quite agent metrics - product needs to specify which metrics we really need for phase0). Keep in mind that one Bot can handle multiple voice interactions at the same time in our current model. This is different from human agents. However, human agents can handle multiple digital interactions.
+- make ESV fetch active Bot sessions and push them to Supervisor similar to how it pushes agent segments today. Here we have questions about visibility: which Bots should supervisors be able to monitor? All in phase0? Do we need a new permission for that? PM's call.
+
+Nicole Quan We can invest in the above, but... there will be adjustments in the future, depending on how we manage Bot engagement. Right now, it's at the workflow level. If we move it to the queue level, and queue logic decides where to send the call—to a Bot or human agent—the Supervisor view would likely have to evolve. How significantly? Hard to say. I sent you a prototype. Judge for yourself. The underlying data model would have to be adjusted—bot segments would have to be attributed to the Queue product type, etc. We'll have to burn some dev cycles on this. Maybe not avoidable, if we want to test the concept first by presenting "agent" centric view to supervisors.  Even if not perfect.
+(Edited)
+
+Vlad Mezhibovsky
+shared a file
+7/2 06:41 AM
+image.png
+
+Chen Kong
+Working
+
+7/2 06:47 AM
+Vlad Mezhibovsky thanks for the info!
+Per the discussion in the Astra sync up meeting just now, Nicole Quan agreed to move both items 1 and 2 to a later phase, and your input proves that—we need more discussion and clarification. 
+cc: Jilion (Zhiliang) Chen Kaison Zhang Amy Huang 
+
+Jilion (Zhiliang) Chen
+UTC+8
+
+7/3 07:28 AM
+Vipindas S please note, UX needs some adjustment base on the agreement above👆🏻 
+
+Sven Liu
+RingCX
+
+shared a link
+7/3 07:44 AM
+Hi Vipindas S 
+CXAIR Phase 1 scope decision from the 7/2 Astra sync-up:
+
+IN Phase 1
+• Interactions Tab display only
+OUT of Phase 1 — deferred to later phase
+• Agent Tab display
+• Change Agent State toggle
+• Confidence + sentiment score columns (moved to Phase 2, tracked under INIT-28002)
