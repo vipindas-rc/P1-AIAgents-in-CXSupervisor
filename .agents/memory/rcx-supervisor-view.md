@@ -42,6 +42,25 @@ routes; all data is generated under `client/src/proto/`.
   type filter dropdown entirely (Agents tab shows only Channel + State), and narrows the State
   filter to Human states only (SupervisorAgents `stateOptionsForType`) so no AI-only state lingers
   as a dead option. Interactions-tab agentType column + agent-type dropdown are separate and kept.
+- **Vendored `@ringcx/ui` components (MultiSelect/DropDown, and the `Filter` that wraps it)
+  crash if rendered outside a styled-components `ThemeProvider theme={theme}` (+ juno
+  `RcThemeProvider`)** — their styled parts read `theme.colors.*` and throw "Cannot read
+  properties of undefined (reading 'background')". `AgentTablePanel` supplies those providers
+  internally, but the page's filter row is a separate render tree, so any `@ringcx/ui` widget
+  used at the page level must be wrapped in its own themed shell (see `proto/SupervisorFilter.tsx`,
+  re-exported via @proto). Keep the `@ringcx/ui`/`theme` imports inside proto/ (tsc-excluded).
+- **Filter state must be PER TAB, not shared.** The Agents and Interactions tabs share the same
+  `SupervisorAgents` page render; using one set of filter/search state for both means an Interactions
+  selection (e.g. agent type "Air", an agent id, a category) silently applies to the Agents list and
+  empties it. Worse, the Agents tab renders no agent-type control (flag off), so a leaked type filter
+  is invisible AND unclearable there. Keep separate `agents*` vs `int*` state groups and feed only the
+  active tab's values to `AgentTablePanel` via `active*` aliases. Each tab needs its own agent-type
+  change handler to clamp its own dependent selections.
+- **Empty-state / label copy comes through the `proto/eag/helpers/translate.ts` stub**, which by default
+  just humanizes the last i18n key segment → ugly UI text like "No Agents Msg". There are no locale
+  files. Add real strings to the `OVERRIDES` map in that stub (keyed by full i18n key) rather than
+  editing each component. Empty-state copy follows rc-content-companion: sentence case, noun phrase, no
+  trailing period.
 - The "Update agent state" menu item is disabled (greyed + tooltip) only for base states
   ENGAGED/CHAT-ENGAGED/BREAK-AFTER-CALL/TRANSITION/PREVIEWING (see MoreMenu); the dialog
   pre-selects the agent's current base state when it maps to a settable option. Human vs Air

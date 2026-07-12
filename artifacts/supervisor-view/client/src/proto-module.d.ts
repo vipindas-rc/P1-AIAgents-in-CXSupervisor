@@ -21,8 +21,31 @@ declare module "@proto" {
   export const agentColumnMeta: { id: string; label: string }[];
   export const interactionColumnMeta: { id: string; label: string }[];
   export const agentStateOptions: Record<"All" | "Air" | "Human", string[]>;
-  export const agentFilterOptions: { value: string; label: string }[];
+  export const agentFilterOptions: {
+    value: string;
+    label: string;
+    agentType: string;
+  }[];
+  export const interactionFacetsByType: Record<
+    string,
+    { channels: string[]; categoryIds: string[] }
+  >;
   export function isCxairPhase1FeatureEnabled(
     flag: "aiAgentsInAgentsTab" | "aiAgentStateChange" | "interactionScoreColumns",
   ): boolean;
+  export interface ProtoFilterItem {
+    id: string;
+    displayName: string;
+  }
+  export const Filter: ComponentType<{
+    ariaLabel?: string;
+    disabled: boolean;
+    openPlaceholder: string;
+    closedPlaceholder: string;
+    selectedFilters: string[];
+    allItems?: ProtoFilterItem[];
+    onChange: (value: string[]) => void;
+    nothingAvailableText?: string;
+    noResultsFoundText?: string;
+  }>;
 }

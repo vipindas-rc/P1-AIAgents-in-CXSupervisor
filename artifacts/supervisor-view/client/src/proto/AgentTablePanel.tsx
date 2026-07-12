@@ -36,6 +36,12 @@ import { isCxairPhase1FeatureEnabled } from "./eag/constants/features";
 // through the same @proto barrel it already uses for column metadata.
 export { isCxairPhase1FeatureEnabled } from "./eag/constants/features";
 
+// Production RingCX multi-select filter (wraps @ringcx/ui MultiSelect), re-exported
+// through the same @proto barrel so the typechecked page layer can render the real
+// product component instead of a hand-written approximation. Exported as the themed
+// wrapper so the MultiSelect gets its required styled-components/juno theme context.
+export { SupervisorFilter as Filter } from "./SupervisorFilter";
+
 // Single source of truth for the agent table column ids/labels, derived directly
 // from the proto column definitions. Consumed by the page's settings dialog so
 // the checkbox list can never drift from the real table columns.
@@ -71,14 +77,54 @@ export const agentStateOptions: Record<"All" | "Air" | "Human", string[]> = {
 // Per-agent options for the Interactions-tab "All agents" picker, derived from
 // the agents that actually appear in the interaction data (so every option
 // resolves to at least one row). Keyed by agentId, labelled with the agent's
-// display name (AirPro agents carry their "Name (Role)" identity).
+// display name (AirPro agents carry their "Name (Role)" identity). Each option
+// also carries the agent's type so the page can narrow the picker to the
+// selected Agent type (Air/Human).
 const _interactionAgents = makeInteractions() as any[];
-export const agentFilterOptions: { value: string; label: string }[] =
-  Array.from(
-    new Map(
-      _interactionAgents.map((r) => [r.agentId, r.fullName]),
-    ).entries(),
-  ).map(([value, label]) => ({ value, label }));
+export const agentFilterOptions: {
+  value: string;
+  label: string;
+  agentType: string;
+}[] = Array.from(
+  new Map(
+    _interactionAgents.map((r) => [
+      r.agentId,
+      { label: r.fullName, agentType: r.agentType },
+    ]),
+  ).entries(),
+).map(([value, { label, agentType }]) => ({ value, label, agentType }));
+
+// Which Channel (sourceName) and Category (categoryIds) values actually occur in
+// the interaction data per agent type, so the page can narrow the Channel and
+// Category pickers to values that appear for the selected Agent type(s).
+export const interactionFacetsByType: Record<
+  string,
+  { channels: string[]; categoryIds: string[] }
+> = (() => {
+  const acc: Record<
+    string,
+    { channels: Set<string>; categoryIds: Set<string> }
+  > = {};
+  for (const r of _interactionAgents) {
+    const t = r.agentType as string;
+    if (!acc[t]) acc[t] = { channels: new Set(), categoryIds: new Set() };
+    if (r.sourceName) acc[t].channels.add(r.sourceName);
+    if (r.categoryIds) {
+      for (const id of String(r.categoryIds).split(",")) {
+        if (id) acc[t].categoryIds.add(id);
+      }
+    }
+  }
+  return Object.fromEntries(
+    Object.entries(acc).map(([t, v]) => [
+      t,
+      {
+        channels: Array.from(v.channels),
+        categoryIds: Array.from(v.categoryIds),
+      },
+    ]),
+  );
+})();
 
 interface AgentTablePanelProps {
   activeTab?: "Agents" | "Interactions";

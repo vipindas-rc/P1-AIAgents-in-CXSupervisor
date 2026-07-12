@@ -19,8 +19,17 @@ const humanize = (key: string, opts?: { count?: number }): string => {
   return s;
 };
 
+// Real product copy for the few user-facing keys whose humanized key name would
+// otherwise leak into the UI (e.g. "No Agents Msg"). Everything else falls back
+// to the humanized last key segment.
+const OVERRIDES: Record<string, string> = {
+  'DASHBOARD.AGENTS.GRID.NO_AGENTS_MSG': 'No agents to display',
+  'DASHBOARD.AGENTS.GRID.NO_MATCH_FOUND': 'No results match your filters',
+  'CHAT.NO_CHATS.NO_INTERACTION_DG': 'No interactions to display',
+};
+
 const translate = (key: string, opts?: { count?: number }): string =>
-  humanize(key, opts);
+  OVERRIDES[key] ?? humanize(key, opts);
 
 export default translate;
 export { Trans, i18next, };
